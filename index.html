@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Babylon Logo</title>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+</head>
+
+<body>
+    <canvas id="renderCanvas" touch-action="none"></canvas>
+    <!-- touch-action="none" for best results from PEP -->
+
+    <script>
+        const canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        const createScene = function () {
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3(0, 0, 0);
+            scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+            // BABYLON.MeshBuilder.CreateBox("box", {});
+            //http://cdn.jsdelivr.net/gh/Ellipsion/3d-particle/public/models/metatech_logo.glb
+            //https://raw.githubusercontent.com/Ellipsion/3d-particle/main/public/models/metatech_logo.glb
+            const logo = BABYLON.SceneLoader.ImportMesh("", "http://cdn.jsdelivr.net/gh/Ellipsion/3d-particle/public/models/", "metatech_logo.glb", scene);
+
+            // const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.4, 15, new BABYLON.Vector3(0.1, -2.7, 11));
+            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.4, 15, new BABYLON.Vector3(0.1, -3.2, 13));
+            // camera.attachControl(canvas, true);
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
+
+            // dustParticles(scene, new BABYLON.Vector3(1, 0, 0));
+            // dustParticles(scene, new BABYLON.Vector3(2, 0, 0));
+            // dustParticles(scene, new BABYLON.Vector3(3, 0, 0));
+            // dustParticles(scene, new BABYLON.Vector3(0, 1, 0));
+            // dustParticles(scene, new BABYLON.Vector3(0, 2, 0));
+            // dustParticles(scene, new BABYLON.Vector3(0, 3, 0));
+            // dustParticles(scene, new BABYLON.Vector3(0, 0, 0));
+            // dustParticles(scene, new BABYLON.Vector3(0, 0, 2));
+            // dustParticles(scene, new BABYLON.Vector3(0, 0, -4));
+            // dustParticles(scene, new BABYLON.Vector3(0, 0, -10));
+            // dustParticles(scene, new BABYLON.Vector3(0, 10, 10));
+            // dustParticles(scene, new BABYLON.Vector3(10, 0, 10));
+            // dustParticles(scene, new BABYLON.Vector3(5, 0, 5));
+            // dustParticles(scene, new BABYLON.Vector3(-5, 0, 5));
+            // dustParticles(scene, new BABYLON.Vector3(-3, 0, 5));
+            // dustParticles(scene, new BABYLON.Vector3(-8, 0, 5));
+            // blueParticles(scene, new BABYLON.Vector3(10, 0, 5));
+            // blueParticles(scene, new BABYLON.Vector3(0, 0, 0));
+            glowParticles(scene);
+
+            scene.onPointerObservable.add((eventData) => {
+                let evt = eventData.event;
+                console.log(evt);
+                // Take delta of mouse movement from last event and create movement vector
+                // You may want to factor in some kind of speed factor into this as well
+                const speedFactor = 0.0002;
+                var movementVector = new BABYLON.Vector3(
+                    -speedFactor * evt.movementX,
+                    speedFactor * evt.movementY,
+                    0,
+                );
+
+                // camera.position.addInPlace(movementVector);
+                camera.target.addInPlace(movementVector);
+                // camera.rotation.addInPlace(movementVector);
+            });
+
+            return scene;
+        };
+
+        const dustParticles = (scene, emitterPos) => {
+            const particleSystem = new BABYLON.ParticleSystem("particles", 2400, scene);
+            particleSystem.particleTexture = new BABYLON.Texture(
+                "https://playground.babylonjs.com/textures/flare.png"
+            );
+
+            particleSystem.emitter = emitterPos;
+
+            particleSystem.minLifeTime = 9;
+            particleSystem.maxLifeTime = 14;
+            particleSystem.minSize = 0.01;
+            particleSystem.maxSize = 0.05;
+            particleSystem.minEmitPower = 0.01;
+            particleSystem.maxEmitPower = 0.1;
+
+            particleSystem.direction1 = new BABYLON.Vector3(-5, 20, 1);
+            particleSystem.direction2 = new BABYLON.Vector3(-5, -20, -11);
+
+
+            particleSystem.start();
+        }
+        const glowParticles = (scene) => {
+            const particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
+            particleSystem.particleTexture = new BABYLON.Texture(
+                "https://playground.babylonjs.com/textures/flare.png"
+            );
+
+            particleSystem.emitter = BABYLON.Vector3.Zero(); // the starting position
+            particleSystem.minEmitBox = new BABYLON.Vector3(-1, -1, -1); // Starting all from
+            particleSystem.maxEmitBox = new BABYLON.Vector3(1, 1, 1); // To...
+
+            // Colors of all particles
+            particleSystem.color1 = new BABYLON.Color4(5, 87, 250, 0);
+            particleSystem.color2 = new BABYLON.Color4(5, 229, 250, 0);
+            // particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+
+            // Size of each particle (random between...
+            particleSystem.minSize = 0;
+            particleSystem.maxSize = 0;
+            // both 0 so size must be 0 at start
+
+            //new property to give final size for particles
+            particleSystem.finalSize = 0.2;
+
+            // Life time of each particle (random between...
+            particleSystem.minLifeTime = 4;
+            particleSystem.maxLifeTime = 8;
+
+            // Emission rate
+            particleSystem.emitRate = 200;
+
+            // Direction of each particle after it has been emitted
+            particleSystem.direction1 = new BABYLON.Vector3(-7, -8, 3);
+            particleSystem.direction2 = new BABYLON.Vector3(7, 8, -3);
+
+            // Speed
+            // particleSystem.minEmitPower = 1;
+            particleSystem.maxEmitPower = 0.001;
+            particleSystem.updateSpeed = 0.005;
+
+            particleSystem.updateFunction = function (particles) {
+                for (var index = 0; index < particles.length; index++) {
+                    var particle = particles[index];
+                    particle.age += this._scaledUpdateSpeed * 0.5;
+
+                    if (particle.age < particle.lifeTime * .35) {
+                        particle.size = particleSystem.finalSize * particle.age / (particle.lifeTime * 2);
+                    }
+
+                    if (particle.age >= particle.lifeTime) { // Recycle by swapping with last particle
+                        this.recycleParticle(particle);
+                        index--;
+                        continue;
+                    }
+                    else {
+                        var speed = this._scaledUpdateSpeed * 2;
+                        if (particle.age >= particle.lifeTime / 2) {
+                            speed = -speed;
+                        }
+
+                        particle.colorStep.scaleToRef(speed, this._scaledColorStep);
+
+
+                        particle.color.addInPlace(this._scaledColorStep);
+
+                        if (particle.color.a < 0)
+                            particle.color.a = 0;
+
+                        particle.angle += particle.angularSpeed * this._scaledUpdateSpeed;
+
+                        particle.direction.scaleToRef(this._scaledUpdateSpeed, this._scaledDirection);
+                        particle.position.addInPlace(this._scaledDirection);
+
+                        this.gravity.scaleToRef(this._scaledUpdateSpeed, this._scaledGravity);
+                        particle.direction.addInPlace(this._scaledGravity);
+                    }
+                }
+            }
+
+
+            particleSystem.start();
+        }
+        const blueParticles = (scene, emitterPos) => {
+            const particleSystem = new BABYLON.ParticleSystem("particles", 2400, scene);
+            particleSystem.particleTexture = new BABYLON.Texture(
+                "https://nefilem.github.io/portfolio2/dust.blue.png"
+            );
+
+            particleSystem.emitter = emitterPos;
+
+            particleSystem.minLifeTime = 9;
+            particleSystem.maxLifeTime = 14;
+            particleSystem.minSize = 0.05;
+            particleSystem.maxSize = 0.1;
+            particleSystem.minEmitPower = 0.1;
+            particleSystem.maxEmitPower = 0.5;
+
+            particleSystem.direction1 = new BABYLON.Vector3(-5, 20, 1);
+            particleSystem.direction2 = new BABYLON.Vector3(-5, -20, -11);
+
+
+            particleSystem.start();
+        }
+
+        const scene = createScene(); //Call the createScene function
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+
+</html>
